@@ -1,8 +1,11 @@
-from django.shortcuts import render,redirect
-from .forms import NoticiaForm, NoticiaFilterForm
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Noticia, Categoria
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+
+from .forms import CategoriaForm, NoticiaFilterForm, NoticiaForm
+from .models import Categoria, Noticia
+
 
 # Create your views here.
 @login_required
@@ -89,3 +92,28 @@ def index(request):
         'search_query': search_query,
     }
     return render(request, 'gerencia/index.html', contexto)
+
+
+class CategoriaListView(ListView):
+    model = Categoria
+    template_name = 'gerencia/categoria_list.html'
+    context_object_name = 'categorias'
+
+
+class CategoriaCreateView(CreateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = 'gerencia/form_categoria.html'
+    success_url = reverse_lazy('gerencia:categoria_list')
+
+
+class CategoriaUpdateView(UpdateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = 'gerencia/form_categoria.html'
+    success_url = reverse_lazy('gerencia:categoria_list')
+
+
+class CategoriaDeleteView(DeleteView):
+    model = Categoria
+    success_url = reverse_lazy('gerencia:categoria_list')
