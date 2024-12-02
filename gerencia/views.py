@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.core import paginator
-from django.db.models.functions import Lower
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
@@ -96,7 +95,7 @@ def index(request):
     return render(request, 'gerencia/index.html', contexto)
 
 
-class CategoriaListView(ListView):
+class CategoriaListView(LoginRequiredMixin, ListView):
     model = Categoria
     template_name = 'gerencia/categoria_list.html'
     context_object_name = 'categorias'
@@ -107,21 +106,27 @@ class CategoriaListView(ListView):
         search_term = self.request.GET.get('search')
         if search_term:
             qs = qs.filter(nome__icontains=search_term)
-        return qs.annotate(nome_lower=Lower('nome')).order_by('nome_lower')
+        return qs.order_by('nome')
 
-class CategoriaCreateView(CreateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = self.request.get_full_path()
+        return context
+
+
+class CategoriaCreateView(LoginRequiredMixin, CreateView):
     model = Categoria
     form_class = CategoriaForm
     template_name = 'gerencia/categoria_form.html'
     success_url = reverse_lazy('gerencia:categoria_list')
 
-class CategoriaUpdateView(UpdateView):
+class CategoriaUpdateView(LoginRequiredMixin, UpdateView):
     model = Categoria
     form_class = CategoriaForm
     template_name = 'gerencia/categoria_form.html'
     success_url = reverse_lazy('gerencia:categoria_list')
 
-class CategoriaDeleteView(DeleteView):
+class CategoriaDeleteView(LoginRequiredMixin, DeleteView):
     model = Categoria
     temaplate_name = 'gerencia/categoria_confirm_delete.html'
     success_url = reverse_lazy('gerencia:categoria_list')
