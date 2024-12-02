@@ -98,22 +98,33 @@ class CategoriaListView(ListView):
     model = Categoria
     template_name = 'gerencia/categoria_list.html'
     context_object_name = 'categorias'
+    paginate_by = 10
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search_term = self.request.GET.get('search')
+        if search_term:
+            qs = qs.filter(nome__icontains=search_term)
+        return qs.order_by('nome')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = self.request.get_full_path()
+        return context
 
 class CategoriaCreateView(CreateView):
     model = Categoria
     form_class = CategoriaForm
-    template_name = 'gerencia/form_categoria.html'
+    template_name = 'gerencia/categoria_form.html'
     success_url = reverse_lazy('gerencia:categoria_list')
-
 
 class CategoriaUpdateView(UpdateView):
     model = Categoria
     form_class = CategoriaForm
-    template_name = 'gerencia/form_categoria.html'
+    template_name = 'gerencia/categoria_form.html'
     success_url = reverse_lazy('gerencia:categoria_list')
-
 
 class CategoriaDeleteView(DeleteView):
     model = Categoria
+    temaplate_name = 'gerencia/categoria_confirm_delete.html'
     success_url = reverse_lazy('gerencia:categoria_list')
