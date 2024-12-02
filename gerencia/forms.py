@@ -27,6 +27,7 @@ from .models import Categoria
 
 
 class CategoriaForm(forms.ModelForm):
+    nome = forms.CharField(max_length=200, required=True)
     class Meta:
         model = Categoria
         fields = ['nome']

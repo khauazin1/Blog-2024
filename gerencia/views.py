@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core import paginator
+from django.db.models.functions import Lower
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
@@ -100,6 +101,13 @@ class CategoriaListView(ListView):
     template_name = 'gerencia/categoria_list.html'
     context_object_name = 'categorias'
     paginate_by = 10
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search_term = self.request.GET.get('search')
+        if search_term:
+            qs = qs.filter(nome__icontains=search_term)
+        return qs.annotate(nome_lower=Lower('nome')).order_by('nome_lower')
 
 class CategoriaCreateView(CreateView):
     model = Categoria
